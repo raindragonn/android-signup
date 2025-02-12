@@ -3,6 +3,7 @@ package nextstep.signup.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,57 +12,64 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nextstep.signup.model.SignupValidations
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.Email
+import nextstep.signup.validator.Password
+import nextstep.signup.validator.PasswordConfirm
+import nextstep.signup.validator.UserName
 
 @Composable
 internal fun SignupInputFields(
     onValidation: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var userName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordConfirm by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf(UserName.of("")) }
+    var email by remember { mutableStateOf(Email.of("")) }
+    var password by remember { mutableStateOf(Password.of("")) }
+    var passwordConfirm by remember { mutableStateOf(PasswordConfirm.of("")) }
 
-    var signupValidations by remember { mutableStateOf(SignupValidations()) }
-    val passwordConfirmValidator =
-        remember(password) { SignupInfoValidator.PasswordConfirm { password } }
+    val isValidations by remember {
+        derivedStateOf {
+            SignupValidations(
+                userName.isValid(),
+                email.isValid(),
+                password.isValid(),
+                passwordConfirm.isValid()
+            ).isAllValidation()
+        }
+    }
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         UserNameTextFiled(
-            text = userName,
-            onValueChange = { userName = it },
-            onValidation = {
-                signupValidations = signupValidations.copy(isUserNamePassed = it)
-                onValidation(signupValidations.isAllValidation())
+            userName = userName,
+            onValueChange = {
+                userName = it
+                onValidation(isValidations)
             },
         )
         EmailTextFiled(
-            text = email,
-            onValueChange = { email = it },
-            onValidation = {
-                signupValidations = signupValidations.copy(isEmailPassed = it)
-                onValidation(signupValidations.isAllValidation())
+            email = email,
+            onValueChange = {
+                email = it
+                onValidation(isValidations)
             },
         )
         PasswordTextFiled(
-            text = password,
-            onValueChange = { password = it },
-            onValidation = {
-                signupValidations = signupValidations.copy(isPasswordPassed = it)
-                onValidation(signupValidations.isAllValidation())
+            password = password,
+            onValueChange = {
+                password = it
+                passwordConfirm = PasswordConfirm.of(passwordConfirm.textValue, it.textValue)
+                onValidation(isValidations)
             },
         )
         PasswordConfirmTextFiled(
-            text = passwordConfirm,
-            validator = passwordConfirmValidator,
-            onValueChange = { passwordConfirm = it },
-            onValidation = {
-                signupValidations = signupValidations.copy(isPasswordConfirmPassed = it)
-                onValidation(signupValidations.isAllValidation())
+            passwordText = password.textValue,
+            passwordConfirm = passwordConfirm,
+            onValueChange = {
+                passwordConfirm = it
+                onValidation(isValidations)
             },
         )
     }

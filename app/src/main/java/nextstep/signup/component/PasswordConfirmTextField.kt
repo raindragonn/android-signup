@@ -11,31 +11,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nextstep.signup.R
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.PasswordConfirm
+import nextstep.signup.validator.getErrorString
 
 @Composable
 internal fun PasswordConfirmTextFiled(
-    text: String,
-    validator: SignupInfoValidator,
-    onValueChange: (String) -> Unit,
+    passwordText: String,
+    passwordConfirm: PasswordConfirm,
+    onValueChange: (PasswordConfirm) -> Unit,
     modifier: Modifier = Modifier,
-    onValidation: (Boolean) -> Unit = {},
 ) {
     SignupTextField(
         modifier = modifier,
         label = stringResource(R.string.signup_label_password_confirm),
-        text = text,
+        text = passwordConfirm.textValue,
         onValueChange = {
-            onValueChange(it)
-            onValidation(validator.checkCondition(it).isSuccess())
+            onValueChange(PasswordConfirm.of(it, passwordText))
         },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done,
             keyboardType = KeyboardType.Password
         ),
-        validateResult = validator.checkCondition(text)
-
+        isError = passwordConfirm.isInvalid(),
+        errorMessage = passwordConfirm.getErrorString()
     )
 }
 
@@ -45,8 +44,8 @@ private fun PasswordConfirmTextFiledPreview(
     @PreviewParameter(PasswordConfirmTextFieldPreviewParameterProvider::class) params: PasswordConfirmPreviewParams,
 ) {
     PasswordConfirmTextFiled(
-        text = params.first,
-        validator = SignupInfoValidator.PasswordConfirm { params.second },
+        passwordText = params.first,
+        passwordConfirm = PasswordConfirm.of(params.first, params.second),
         onValueChange = { },
     )
 }

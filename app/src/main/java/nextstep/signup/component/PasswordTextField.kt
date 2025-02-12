@@ -11,30 +11,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nextstep.signup.R
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.Password
+import nextstep.signup.validator.getErrorString
 
 @Composable
 internal fun PasswordTextFiled(
-    text: String,
-    onValueChange: (String) -> Unit,
+    password: Password,
+    onValueChange: (Password) -> Unit,
     modifier: Modifier = Modifier,
-    onValidation: (Boolean) -> Unit = {},
-    validator: SignupInfoValidator = SignupInfoValidator.Password,
 ) {
     SignupTextField(
         modifier = modifier,
         label = stringResource(R.string.signup_label_password),
-        text = text,
-        onValueChange = {
-            onValueChange(it)
-            onValidation(validator.checkCondition(it).isSuccess())
-        },
+        text = password.textValue,
+        onValueChange = { onValueChange(Password.of(it)) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Password
         ),
-        validateResult = validator.checkCondition(text)
+        isError = password.isInvalid(),
+        errorMessage = password.getErrorString(),
     )
 }
 
@@ -44,7 +41,7 @@ private fun PasswordTextFiledPreview(
     @PreviewParameter(PasswordTextFieldPreviewParameterProvider::class) password: String,
 ) {
     PasswordTextFiled(
-        text = password,
+        password = Password.of(password),
         onValueChange = { },
     )
 }

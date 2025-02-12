@@ -2,6 +2,10 @@ package nextstep.signup.component
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -11,30 +15,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nextstep.signup.R
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.UserName
+import nextstep.signup.validator.getErrorString
 
 @Composable
 internal fun UserNameTextFiled(
-    text: String,
-    onValueChange: (String) -> Unit,
+    userName: UserName,
+    onValueChange: (UserName) -> Unit,
     modifier: Modifier = Modifier,
-    onValidation: (Boolean) -> Unit = {},
-    validator: SignupInfoValidator = SignupInfoValidator.Username
 ) {
     SignupTextField(
         modifier = modifier,
         label = stringResource(R.string.signup_label_user_name),
-        text = text,
-        onValueChange = {
-            onValueChange(it)
-            onValidation(validator.checkCondition(it).isSuccess())
-        },
+        text = userName.textValue,
+        onValueChange = { onValueChange(UserName.of(it)) },
         visualTransformation = VisualTransformation.None,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Text
         ),
-        validateResult = validator.checkCondition(text)
+        isError = userName.isInvalid(),
+        errorMessage = userName.getErrorString()
     )
 }
 
@@ -42,11 +43,12 @@ internal fun UserNameTextFiled(
 @Preview(showBackground = true)
 @Composable
 private fun UserNameTextFieldPreview(
-    @PreviewParameter(UsernamePreviewParameterProvider::class) username: String,
+    @PreviewParameter(UsernamePreviewParameterProvider::class) str: String,
 ) {
+    var userName by remember { mutableStateOf(UserName.of(str)) }
     UserNameTextFiled(
-        text = username,
-        onValueChange = {}
+        userName = userName,
+        onValueChange = { userName = it }
     )
 }
 
@@ -57,5 +59,6 @@ private class UsernamePreviewParameterProvider : PreviewParameterProvider<String
             "이",
             "2용우!",
             "컴포즈",
+            "",
         )
 }

@@ -1,7 +1,9 @@
 package nextstep.signup.component
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -12,7 +14,8 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.Password
+import nextstep.signup.validator.PasswordConfirm
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,8 +33,8 @@ class PasswordConfirmTextFieldTest {
         // when
         composeTestRule.setContent {
             PasswordConfirmTextFiled(
-                text = "passwordConfirm",
-                validator = SignupInfoValidator.PasswordConfirm { "passwordConfirm" },
+                passwordText = "passwordConfirm",
+                passwordConfirm = PasswordConfirm.of("passwordConfirm"),
                 onValueChange = { },
             )
         }
@@ -46,15 +49,17 @@ class PasswordConfirmTextFieldTest {
     fun `비밀번호_확인은_평문으로_보이지_않는다`() {
         composeTestRule.setContent {
             PasswordConfirmTextFiled(
-                text = "1q2w3e4r",
-                validator = SignupInfoValidator.PasswordConfirm { "1q2w3e4r" },
+                passwordText = "1q2w3e4r",
+                passwordConfirm = PasswordConfirm.of("1q2w3e4r"),
                 onValueChange = { },
             )
         }
 
+        composeTestRule.waitForIdle()
+
         // then
         composeTestRule
-            .onAllNodesWithText("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022")
+            .onAllNodesWithText("••••••••")
             .onFirst()
             .assertIsDisplayed()
     }
@@ -68,20 +73,20 @@ class PasswordConfirmTextFieldTest {
         val confirmPassword = "1q2w3e4r5"
 
         composeTestRule.setContent {
-            val (password, setPassword) = remember { mutableStateOf("") }
-            val (passwordConfirm, setPasswordConfirm) = remember { mutableStateOf("") }
+            var password by remember { mutableStateOf(Password.of("")) }
+            var passwordConfirm by remember { mutableStateOf(PasswordConfirm.of("")) }
 
             PasswordTextFiled(
-                text = password,
-                onValueChange = setPassword,
+                password = password,
+                onValueChange = { password = it },
                 modifier = Modifier.testTag(passwordTag)
             )
 
             PasswordConfirmTextFiled(
-                text = passwordConfirm,
-                validator = SignupInfoValidator.PasswordConfirm { password },
-                onValueChange = setPasswordConfirm,
-                modifier = Modifier.testTag(confirmTag)
+                modifier = Modifier.testTag(confirmTag),
+                passwordText = password.textValue,
+                passwordConfirm = passwordConfirm,
+                onValueChange = { passwordConfirm = it },
             )
         }
 

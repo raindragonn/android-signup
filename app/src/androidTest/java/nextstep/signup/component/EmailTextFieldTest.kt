@@ -1,7 +1,9 @@
 package nextstep.signup.component
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assert
@@ -11,6 +13,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
+import nextstep.signup.validator.Email
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,10 +28,10 @@ class EmailTextFieldTest {
     @Before
     fun setup() {
         composeTestRule.setContent {
-            val (text, setText) = remember { mutableStateOf("") }
+            var email by remember { mutableStateOf(Email.of("")) }
             EmailTextFiled(
-                text = text,
-                onValueChange = setText,
+                email = email,
+                onValueChange = { email = it },
                 modifier = Modifier.testTag(tag)
             )
         }

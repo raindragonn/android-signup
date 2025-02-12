@@ -24,7 +24,6 @@ import nextstep.signup.ui.theme.Blue50
 import nextstep.signup.ui.theme.BlueGray20
 import nextstep.signup.ui.theme.Gray20
 import nextstep.signup.ui.theme.Red
-import nextstep.signup.validator.SignupInfoValidateResult
 
 
 @Composable
@@ -32,10 +31,11 @@ internal fun SignupTextField(
     label: String,
     text: String,
     onValueChange: (String) -> Unit,
+    isError: Boolean,
+    errorMessage: String?,
     visualTransformation: VisualTransformation,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    validateResult: SignupInfoValidateResult = SignupInfoValidateResult.Success,
 ) {
     TextField(
         modifier = modifier
@@ -55,17 +55,12 @@ internal fun SignupTextField(
             errorIndicatorColor = Red
         ),
         supportingText = {
-            Text(
-                text = validateResult.getErrorMessage(),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    lineHeight = 16.sp
-                )
-            )
+            if (isError) {
+                SupportingErrorText(errorMessage)
+            }
         },
         keyboardOptions = keyboardOptions,
-        isError = validateResult.isError(),
+        isError = isError,
         label = {
             Text(
                 text = label,
@@ -81,28 +76,46 @@ internal fun SignupTextField(
     )
 }
 
+@Composable
+private fun SupportingErrorText(
+    errorMessage: String?,
+    modifier: Modifier = Modifier
+) {
+    if (errorMessage == null) return
+    Text(
+        modifier = modifier,
+        text = errorMessage,
+        style = TextStyle(
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal,
+            lineHeight = 16.sp
+        )
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun SignupFieldPreview_userName() {
     var text by remember { mutableStateOf("") }
-
     SignupTextField(
         label = stringResource(R.string.signup_label_user_name),
         text = text,
         onValueChange = { text = it },
-        visualTransformation = VisualTransformation.None,
+        isError = false,
+        errorMessage = null,
+        visualTransformation = VisualTransformation.None
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SignupFieldPreview_password() {
-    var text by remember { mutableStateOf("아무도 안알랴줌") }
-
     SignupTextField(
         label = stringResource(R.string.signup_label_password),
-        text = text,
-        onValueChange = { text = it },
+        text = "아무도 안알랴줌",
+        onValueChange = { },
         visualTransformation = PasswordVisualTransformation(),
+        isError = false,
+        errorMessage = null,
     )
 }

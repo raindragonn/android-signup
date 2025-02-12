@@ -11,40 +11,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import nextstep.signup.R
-import nextstep.signup.validator.SignupInfoValidator
+import nextstep.signup.validator.Email
+import nextstep.signup.validator.getErrorString
 
 @Composable
 internal fun EmailTextFiled(
-    text: String,
-    onValueChange: (String) -> Unit,
+    email: Email,
+    onValueChange: (Email) -> Unit,
     modifier: Modifier = Modifier,
-    onValidation: (Boolean) -> Unit = {},
-    validator: SignupInfoValidator = SignupInfoValidator.Email,
 ) {
     SignupTextField(
         modifier = modifier,
         label = stringResource(R.string.signup_label_email),
-        text = text,
-        onValueChange = {
-            onValueChange(it)
-            onValidation(validator.checkCondition(it).isSuccess())
-        },
+        text = email.textValue,
+        onValueChange = { onValueChange(Email.of(it)) },
         visualTransformation = VisualTransformation.None,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Email
         ),
-        validateResult = validator.checkCondition(text)
+        isError = email.isInvalid(),
+        errorMessage = email.getErrorString()
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EmailTextFiledPreview(
-    @PreviewParameter(EmailTextFieldPreviewParameterProvider::class) email: String,
+    @PreviewParameter(EmailTextFieldPreviewParameterProvider::class) text: String,
 ) {
     EmailTextFiled(
-        text = email,
+        email = Email.of(text),
         onValueChange = { },
     )
 }
